@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🎃 Halloween Quest</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="moon"></div>
+<div class="fog"></div>
+<div class="web tl"></div>
+<div class="web tr"></div>
+
+{% if inventory %}
+<header class="top-bar">
+    <a href="{{ url_for('hall') }}" class="logo">🎃 Halloween Quest</a>
+    <div class="inventory-mini">
+         {% for item in inventory %}<span class="inv-item">{{ item }}</span>{% endfor %}
+    </div>
+</header>
+{% endif %}
+
+<main class="room">
+    {% block content %}{% endblock %}
+</main>
+
+{% if inventory %}
+<footer class="bottom-bar">
+    <a href="{{ url_for('start') }}">🏠 Restart</a>
+    <a href="{{ url_for('reset') }}" style="color:#ff4500; text-decoration:none;">️ Reset Progress</a>
+    <span>Rooms visited: {{ visited|length }}</span>
+</footer>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

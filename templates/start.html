@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .room {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 2rem !important;
+        min-height: 100vh;
+        /* УБРАЛИ position: fixed и overflow-y: auto */
+        background: linear-gradient(rgba(5,0,15,0.5), rgba(5,0,15,0.75)),
+            url('/static/images/witch-house.jpg') center/cover no-repeat !important;
+    }
+    .start-screen {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        z-index: 100;
+        background:
+            linear-gradient(rgba(5,0,15,0.4), rgba(5,0,15,0.6)),
+            url('/static/images/witch-house.jpg') center/cover no-repeat;
+        background-color: #1a0a2a;
+    }
+
+    .start-moon {
+        position: absolute;
+        top: 10%;
+        right: 12%;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #fff8dc, #ffd27f 60%, #ff8c00);
+        box-shadow: 0 0 60px #ffd27f, 0 0 120px rgba(255,140,0,0.5);
+        animation: moonGlow 4s ease-in-out infinite alternate;
+        z-index: 1;
+    }
+    @keyframes moonGlow {
+        from { box-shadow: 0 0 60px #ffd27f, 0 0 120px rgba(255,140,0,0.5); }
+        to   { box-shadow: 0 0 90px #ffe4a0, 0 0 180px rgba(255,140,0,0.7); }
+    }
+
+    .start-bats {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1;
+    }
+    .start-bat {
+        position: absolute;
+        font-size: 2.5rem;
+        opacity: 0.7;
+        animation: batFly 14s linear infinite;
+    }
+    .start-bat:nth-child(1) { top: 20%; animation-delay: 0s; }
+    .start-bat:nth-child(2) { top: 40%; animation-delay: 5s; font-size: 1.8rem; }
+    .start-bat:nth-child(3) { top: 60%; animation-delay: 10s; font-size: 2.2rem; }
+    @keyframes batFly {
+        0%   { left: -10%; transform: translateY(0) rotate(0); }
+        25%  { transform: translateY(-40px) rotate(-15deg); }
+        50%  { transform: translateY(0) rotate(0); }
+        75%  { transform: translateY(40px) rotate(15deg); }
+        100% { left: 110%; transform: translateY(0) rotate(0); }
+    }
+
+    .start-title {
+        font-family: 'Nosifer', serif;
+        font-size: clamp(2.5rem, 7vw, 5rem);
+        color: #ff6a00;
+        text-shadow:
+            0 0 15px #ff4500,
+            0 0 30px #ff4500,
+            0 0 60px #8b0000,
+            4px 4px 0 #000;
+        margin-bottom: 1rem;
+        animation: flicker 3s infinite alternate, titleFloat 6s ease-in-out infinite;
+        position: relative;
+        z-index: 2;
+    }
+    @keyframes flicker {
+        0%,18%,22%,25%,53%,57%,100% { opacity: 1; }
+        20%,24%,55% { opacity: 0.6; }
+    }
+    @keyframes titleFloat {
+        0%,100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .start-subtitle {
+        font-family: Georgia, serif;
+        font-size: clamp(1rem, 2vw, 1.3rem);
+        color: #ffd27f;
+        max-width: 600px;
+        line-height: 1.6;
+        margin-bottom: 3rem;
+        font-style: italic;
+        text-shadow: 0 0 10px rgba(255,210,127,0.3);
+        position: relative;
+        z-index: 2;
+    }
+
+    .enter-btn {
+        display: inline-block;
+        padding: 1.5rem 4rem;
+        font-family: 'Nosifer', serif;
+        font-size: clamp(1.5rem, 3vw, 2.2rem);
+        color: #fff;
+        text-decoration: none;
+        letter-spacing: 4px;
+        background: linear-gradient(135deg, #8b0000, #ff4500);
+        border: 3px solid #ff6a00;
+        border-radius: 50px;
+        box-shadow:
+            0 0 30px rgba(255,106,0,0.7),
+            0 0 60px rgba(255,69,0,0.5),
+            inset 0 0 20px rgba(0,0,0,0.3);
+        transition: all 0.3s;
+        position: relative;
+        z-index: 2;
+        animation: pulse 2s infinite;
+        cursor: pointer;
+    }
+    @keyframes pulse {
+        0%,100% {
+            box-shadow: 0 0 30px rgba(255,106,0,0.7), 0 0 60px rgba(255,69,0,0.5);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 50px rgba(255,106,0,1), 0 0 100px rgba(255,69,0,0.8);
+            transform: scale(1.05);
+        }
+    }
+    .enter-btn:hover {
+        transform: scale(1.15) !important;
+        box-shadow: 0 0 60px rgba(255,106,0,1), 0 0 120px rgba(255,69,0,0.9);
+        background: linear-gradient(135deg, #a00000, #ff6a00);
+        letter-spacing: 6px;
+    }
+
+    .start-hint {
+        position: absolute;
+        bottom: 30px;
+        color: #888;
+        font-family: Georgia, serif;
+        font-size: 0.9rem;
+        font-style: italic;
+        z-index: 2;
+    }
+
+    @media (max-width: 600px) {
+        .enter-btn { padding: 1rem 2.5rem; letter-spacing: 2px; }
+        .start-moon { width: 70px; height: 70px; right: 5%; top: 5%; }
+        .start-bat { font-size: 1.5rem; }
+    }
+</style>
+
+<div class="start-screen">
+    <div class="start-moon"></div>
+    <div class="start-bats">
+        <div class="start-bat">🦇</div>
+        <div class="start-bat">🦇</div>
+        <div class="start-bat">🦇</div>
+    </div>
+
+    <h1 class="start-title">The Witch's House</h1>
+    <p class="start-subtitle">
+        An ancient evil has taken residence in this haunted mansion.<br>
+        Solve the puzzles, collect the ingredients, brew the potion —<br>
+        and defeat the witch before midnight!
+    </p>
+
+    <a href="{{ url_for('hall') }}" class="enter-btn">ENTER</a>
+
+    <p class="start-hint">🎃 Click to begin your journey... 🎃</p>
+</div>
+{% endblock %}

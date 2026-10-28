@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .room {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 2rem;
+        min-height: 100vh;
+        background: linear-gradient(rgba(5,0,15,0.5), rgba(5,0,15,0.75)),
+            url('/static/images/attic-bg.jpg') center/cover no-repeat;
+    }
+    .top-bar, .bottom-bar, .moon, .fog, .web { display: none !important; }
+    .room > * { position: relative; z-index: 5; }
+
+    .task-container { max-width: 1100px; margin: 2rem auto; }
+    .task-title {
+        font-family: 'Nosifer', serif;
+        font-size: 2rem;
+        color: #ff6a00;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    .task-instruction {
+        text-align: center;
+        font-size: 1.3rem;
+        color: #ffd27f;
+        margin-bottom: 2rem;
+        font-family: Georgia, serif;
+        font-style: italic;
+    }
+
+    .questions-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: center;
+    }
+
+    .question-box {
+        background: rgba(0,0,0,0.85);
+        border: 3px solid #ff6a00;
+        border-radius: 20px;
+        padding: 2rem;
+        width: calc(50% - 1rem);
+        box-sizing: border-box;
+        min-width: 320px;
+    }
+
+    .question-number {
+        font-family: 'Nosifer', serif;
+        font-size: 1.3rem;
+        color: #ffd700;
+        margin-bottom: 1rem;
+    }
+
+    .sentence {
+        font-size: 1.4rem;
+        color: #fff;
+        padding: 1.5rem;
+        background: rgba(139,0,0,0.3);
+        border-left: 4px solid #ff4500;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        font-family: Georgia, serif;
+        line-height: 1.6;
+    }
+
+    .options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .option-btn {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #4b0082, #8b0000);
+        border: 2px solid #ff6a00;
+        border-radius: 15px;
+        color: #fff;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Creepster', serif;
+        min-width: 130px;
+    }
+
+    .option-btn:hover:not(:disabled) {
+        transform: scale(1.08);
+        box-shadow: 0 0 20px #ff6a00;
+    }
+
+    .option-btn.selected {
+        background: linear-gradient(135deg, #2a5a8a, #4a7aaa);
+        border-color: #ffd700;
+        box-shadow: 0 0 15px rgba(255,215,0,0.5);
+    }
+
+    .option-btn.correct {
+        background: linear-gradient(135deg, #2a7a2a, #4a9a4a);
+        border-color: #ffd700;
+        cursor: default;
+    }
+
+    .option-btn.wrong {
+        background: rgba(139,0,0,0.8);
+        border-color: #ff4500;
+        animation: shake 0.5s;
+    }
+
+    .option-btn:disabled {
+        cursor: default;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+    }
+
+    .question-status {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 1rem;
+        min-height: 1.5rem;
+    }
+    .question-status.correct { color: #90EE90; }
+    .question-status.wrong { color: #ff6b6b; }
+
+    .submit-btn {
+        display: block;
+        width: 100%;
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 1.2rem;
+        background: linear-gradient(135deg, #8b0000, #ff4500);
+        border: 2px solid #ffd700;
+        border-radius: 20px;
+        color: #fff;
+        font-family: 'Nosifer', serif;
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(255,215,0,0.8);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .success-box {
+        max-width: 600px;
+        margin: 3rem auto;
+        background: rgba(42,122,42,0.4);
+        border: 3px solid #2a7a2a;
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+    }
+    .success-box h2 { font-family: 'Nosifer', serif; color: #ffd700; font-size: 2rem; margin-bottom: 1rem; }
+    .success-box p { font-size: 1.3rem; color: #fff; margin: 0.5rem 0; }
+
+    .back-btn {
+        display: block;
+        width: fit-content;
+        margin: 3rem auto;
+        padding: 1rem 2.5rem;
+        background: rgba(139,0,0,0.9);
+        border: 2px solid #ff6a00;
+        border-radius: 25px;
+        color: #fff;
+        font-family: 'Nosifer', serif;
+        font-size: 1.1rem;
+        text-decoration: none;
+        text-align: center;
+    }
+    .back-btn:hover { background: #ff4500; transform: scale(1.05); }
+
+    .hint-box {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background: rgba(255,210,127,0.1);
+        border-radius: 10px;
+        color: #ffd27f;
+        font-style: italic;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .question-box { width: 100% !important; min-width: auto; }
+    }
+</style>
+
+<div class="task-container">
+    <h1 class="task-title">🏚️ The Dusty Attic</h1>
+    <p class="task-instruction">Choose the correct form: There is / There are / Is there / Are there</p>
+
+    {% if solved %}
+        <div class="success-box">
+            <h2>Excellent job!</h2>
+            <p>You chose all correct forms!</p>
+            <p style="font-size:1.5rem; margin:1rem 0; color:#ffd27f;">You found: <b>👻 Ghost Essence</b></p>
+        </div>
+    {% else %}
+        <form method="POST" id="atticForm">
+            <div class="questions-grid">
+                {% for task in tasks %}
+                <div class="question-box" data-question="{{ loop.index0 }}" data-correct="{{ task.answer }}">
+                    <div class="question-number">Question {{ loop.index }}:</div>
+                    <div class="sentence">{{ task.prompt }}</div>
+
+                    <div class="options">
+                        {% for option in task.options %}
+                        <button type="button" class="option-btn" data-value="{{ option }}" onclick="selectOption(this)">
+                            {{ option }}
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <div class="question-status" id="status{{ loop.index0 }}"></div>
+                    <input type="hidden" name="answer{{ loop.index0 }}" id="answer{{ loop.index0 }}" value="">
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" class="submit-btn" id="checkBtn" onclick="checkAllAnswers()">
+                Check All Answers 🎃
+            </button>
+
+            <button type="submit" class="submit-btn" id="submitBtn" style="display:none;">
+                Submit & Get Ghost Essence 👻
+            </button>
+        </form>
+    {% endif %}
+
+    <a href="{{ url_for('fireplace_room') }}" class="back-btn">← Back to Fireplace Room</a>
+</div>
+
+<script>
+const userAnswers = {};
+const totalQuestions = {{ tasks|length }};
+
+function selectOption(button) {
+    const questionBox = button.closest('.question-box');
+    const qIndex = questionBox.getAttribute('data-question');
+    const value = button.getAttribute('data-value');
+
+    // Снимаем выделение со ВСЕХ кнопок в этом вопросе
+    questionBox.querySelectorAll('.option-btn').forEach(btn => {
+        btn.classList.remove('selected', 'wrong');
+    });
+
+    // Выделяем только нажатую
+    button.classList.add('selected');
+
+    // Сохраняем ответ
+    userAnswers[qIndex] = value;
+    document.getElementById(`answer${qIndex}`).value = value;
+
+    // Сбрасываем статус
+    const status = document.getElementById(`status${qIndex}`);
+    status.textContent = '';
+    status.className = 'question-status';
+}
+
+function checkAllAnswers() {
+    // Проверяем, что на все вопросы ответили
+    for (let i = 0; i < totalQuestions; i++) {
+        if (!userAnswers[i]) {
+            alert(`Please answer Question ${i + 1}!`);
+            return;
+        }
+    }
+
+    let allCorrect = true;
+
+    // Проверяем каждый вопрос
+    for (let i = 0; i < totalQuestions; i++) {
+        const questionBox = document.querySelector(`[data-question="${i}"]`);
+        const correctAnswer = questionBox.getAttribute('data-correct');
+        const userAnswer = userAnswers[i];
+        const status = document.getElementById(`status${i}`);
+
+        if (userAnswer === correctAnswer) {
+            // Правильно!
+            status.textContent = '✅ Correct!';
+            status.className = 'question-status correct';
+
+            // Подсвечиваем правильную кнопку зелёным и блокируем все
+            questionBox.querySelectorAll('.option-btn').forEach(btn => {
+                if (btn.getAttribute('data-value') === userAnswer) {
+                    btn.classList.remove('selected');
+                    btn.classList.add('correct');
+                }
+                btn.disabled = true;
+            });
+        } else {
+            // Неправильно!
+            allCorrect = false;
+            status.textContent = '❌ Wrong! Try again.';
+            status.className = 'question-status wrong';
+
+            // Подсвечиваем неправильную кнопку красным
+            questionBox.querySelectorAll('.option-btn').forEach(btn => {
+                if (btn.getAttribute('data-value') === userAnswer) {
+                    btn.classList.remove('selected');
+                    btn.classList.add('wrong');
+                }
+            });
+
+            // Через 1.5 сек снимаем красную подсветку
+            setTimeout(() => {
+                const wrongBtn = questionBox.querySelector(`[data-value="${userAnswer}"]`);
+                if (wrongBtn) wrongBtn.classList.remove('wrong');
+                status.textContent = '';
+                status.className = 'question-status';
+            }, 1500);
+        }
+    }
+
+    // Если всё правильно — показываем кнопку отправки
+    if (allCorrect) {
+        document.getElementById('checkBtn').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'block';
+        document.getElementById('submitBtn').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+</script>
+{% endblock %}

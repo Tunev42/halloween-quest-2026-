@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .victory-screen {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 3rem 2rem;
+        background: rgba(0,0,0,0.7);
+        border: 3px solid #ffd700;
+        border-radius: 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .victory-title {
+        font-family: 'Nosifer', serif;
+        font-size: 3rem;
+        color: #ffd700;
+        text-shadow: 0 0 20px rgba(255,215,0,0.8);
+        margin-bottom: 2rem;
+        animation: victoryPulse 2s infinite;
+    }
+    @keyframes victoryPulse {
+        0%,100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .victory-emoji {
+        font-size: 5rem;
+        margin: 1rem 0;
+    }
+
+    .victory-story {
+        font-family: Georgia, serif;
+        font-size: 1.2rem;
+        line-height: 1.8;
+        color: #fff;
+        white-space: pre-line;
+        margin: 2rem 0;
+        padding: 2rem;
+        background: rgba(139,0,0,0.3);
+        border-radius: 15px;
+        border-left: 4px solid #ffd700;
+        text-align: left;
+    }
+
+    .final-stats {
+        background: rgba(42,122,42,0.3);
+        border: 2px solid #2a7a2a;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        color: #ffd27f;
+        font-size: 1.1rem;
+    }
+
+    .restart-btn {
+        display: inline-block;
+        padding: 1rem 3rem;
+        background: linear-gradient(135deg, #8b0000, #ff4500);
+        color: #fff;
+        border: 2px solid #ffd700;
+        border-radius: 30px;
+        font-family: 'Nosifer', serif;
+        font-size: 1.3rem;
+        text-decoration: none;
+        transition: all 0.3s;
+        margin-top: 1rem;
+    }
+    .restart-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px rgba(255,215,0,0.8);
+    }
+</style>
+
+<div class="victory-screen">
+    <h1 class="victory-title">✨ YOU WIN! ✨</h1>
+    <div class="victory-emoji">🧙♀️ → 👵 → </div>
+
+    <div class="victory-story">{{ story }}</div>
+
+    <div class="final-stats">
+        <p> Rooms explored: {{ visited|length }}</p>
+        <p>🎒 Ingredients collected: {{ inventory|length }} / 7</p>
+        <p>⭐ Moral: Friendship is the strongest magic!</p>
+    </div>
+
+    <a href="{{ url_for('start') }}" class="restart-btn">🔄 Play Again</a>
+</div>
+{% endblock %}

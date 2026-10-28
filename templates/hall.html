@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .hall-screen {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100vh;
+        overflow: hidden;
+        background:
+            linear-gradient(rgba(5,0,15,0.15), rgba(5,0,15,0.25)),
+            url('/static/images/hall-bg.jpg') center/cover no-repeat;
+        background-color: #1a0a2a;
+    }
+
+    .hall-title {
+        position: absolute;
+        top: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: 'Nosifer', serif;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        color: #ff6a00;
+        text-shadow: 0 0 15px #ff4500, 0 0 30px #ff4500, 0 0 60px #8b0000, 3px 3px 0 #000;
+        text-align: center;
+        animation: titleFloat 6s ease-in-out infinite;
+        z-index: 10;
+        white-space: nowrap;
+    }
+    @keyframes titleFloat {
+        0%,100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-8px); }
+    }
+
+    .hall-desc {
+        position: absolute;
+        top: 14%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: Georgia, serif;
+        font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+        color: #ffd27f;
+        text-align: center;
+        font-style: italic;
+        text-shadow: 0 0 10px rgba(0,0,0,0.9);
+        z-index: 10;
+        white-space: nowrap;
+    }
+
+    .portal {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 1rem;
+        background: rgba(10, 5, 20, 0.75);
+        backdrop-filter: blur(8px);
+        border: 3px solid #ff6a00;
+        border-radius: 15px;
+        text-decoration: none;
+        color: #fff;
+        transition: all 0.4s;
+        box-shadow: 0 0 30px rgba(255,106,0,0.5);
+        z-index: 5;
+        min-width: 180px;
+    }
+
+    .portal:hover {
+        transform: scale(1.1);
+        background: rgba(10, 5, 20, 0.9);
+        box-shadow: 0 0 50px rgba(255,106,0,0.9);
+        border-color: #ffd27f;
+    }
+
+    .portal-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        filter: drop-shadow(0 0 15px rgba(255,106,0,0.8));
+        animation: portalPulse 2s ease-in-out infinite;
+    }
+    @keyframes portalPulse {
+        0%,100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+    }
+
+    .portal-text {
+        font-family: 'Nosifer', serif;
+        font-size: 1.1rem;
+        color: #ff6a00;
+        text-align: center;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(255,106,0,0.5);
+    }
+
+    .portal-hint {
+        font-family: Georgia, serif;
+        font-size: 0.8rem;
+        color: #ccc;
+        font-style: italic;
+        margin-top: 0.3rem;
+        text-align: center;
+    }
+
+    .portal-door { top: 40%; left: 8%; }
+    .portal-fireplace { top: 55%; right: 8%; }
+
+    .portal-glass {
+        top: 45%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .portal-glass:hover { transform: translateX(-50%) scale(1.1); }
+
+    .portal-glass.locked {
+        opacity: 0.4;
+        border-color: #555;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    .portal-glass.locked .portal-icon { animation: none; }
+
+    .portal-cauldron {
+        position: absolute;
+        bottom: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-color: #ffd700;
+        box-shadow: 0 0 40px rgba(255,215,0,0.7);
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%,100% { box-shadow: 0 0 40px rgba(255,215,0,0.7); }
+        50% { box-shadow: 0 0 60px rgba(255,215,0,1); }
+    }
+
+    @media (max-width: 900px) {
+        .portal { min-width: 140px; padding: 1rem 0.8rem; }
+        .portal-icon { font-size: 2.5rem; }
+        .portal-text { font-size: 0.9rem; }
+        .portal-door { left: 3%; }
+        .portal-fireplace { right: 3%; }
+    }
+    @media (max-width: 600px) {
+        .portal { min-width: 120px; }
+        .portal-door { top: 35%; left: 2%; }
+        .portal-fireplace { top: 50%; right: 2%; }
+        .portal-glass { top: 40%; }
+    }
+</style>
+
+<div class="hall-screen">
+    <h1 class="hall-title">THE HAUNTED HALL</h1>
+    <p class="hall-desc">Three paths lie before you. Choose wisely...</p>
+
+    <a href="{{ url_for('door_room') }}" class="portal portal-door">
+        <div class="portal-icon">🚪</div>
+        <div class="portal-text">ENTER THE DOOR</div>
+        <div class="portal-hint">Library · Kitchen · Basement</div>
+    </a>
+
+    <a href="{{ url_for('fireplace_room') }}" class="portal portal-fireplace">
+        <div class="portal-icon">🔥</div>
+        <div class="portal-text">CLIMB THE FIREPLACE</div>
+        <div class="portal-hint">Attic · Mirror Room · Crypt</div>
+    </a>
+
+        <!-- 🪟 ЦЕНТРАЛЬНОЕ СТЕКЛО — GARDEN (только после ВСЕХ 6 заданий!) -->
+    {% set required_ingredients = ['Spider Web', 'Bat Wing', 'Pumpkin Dust', 'Ghost Essence', 'Shadow Crystal', 'Bone Dust'] %}
+    {% set completed_tasks = [] %}
+    {% for item in required_ingredients %}
+        {% if item in inventory %}
+            {% set completed_tasks = completed_tasks.append(item) %}
+        {% endif %}
+    {% endfor %}
+
+    <a href="{{ url_for('garden') if inventory|length >= 6 else '#' }}"
+       class="portal portal-glass {% if inventory|length < 6 %}locked{% endif %}">
+        <div class="portal-icon">{% if inventory|length >= 6 %}🪟{% else %}{% endif %}</div>
+        <div class="portal-text">{% if inventory|length >= 6 %}EXIT TO GARDEN{% else %}LOCKED{% endif %}</div>
+        <div class="portal-hint">
+            {% if inventory|length >= 6 %}
+                All tasks completed! The moonflower awaits...
+            {% else %}
+                Complete ALL 6 tasks first! ({{ inventory|length }}/6)
+            {% endif %}
+        </div>
+    </a>
+
+    {% if inventory|length >= 7 %}
+    <a href="{{ url_for('cauldron') }}" class="portal portal-cauldron">
+        <div class="portal-icon">🧪</div>
+        <div class="portal-text">BREW THE POTION</div>
+        <div class="portal-hint">All ingredients collected!</div>
+    </a>
+    {% endif %}
+</div>
+{% endblock %}

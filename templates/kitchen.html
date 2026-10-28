@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .room {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 2rem;
+        min-height: 100vh;
+        background: linear-gradient(rgba(5,0,15,0.65), rgba(5,0,15,0.85)),
+            url('/static/images/kitchen-bg.jpg') center/cover no-repeat;
+    }
+    .top-bar, .bottom-bar, .moon, .fog, .web { display: none !important; }
+    .room > * { position: relative; z-index: 5; }
+
+    .task-container { max-width: 800px; margin: 2rem auto; }
+    .task-title {
+        font-family: 'Nosifer', serif;
+        font-size: 2rem;
+        color: #ff6a00;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    .task-instruction {
+        text-align: center;
+        font-size: 1.3rem;
+        color: #ffd27f;
+        margin-bottom: 2rem;
+        font-family: Georgia, serif;
+        font-style: italic;
+    }
+
+    .monster-image-container {
+        text-align: center;
+        margin: 2rem 0;
+    }
+
+    .monster-image {
+        max-width: 100%;
+        max-height: 450px;
+        border-radius: 20px;
+        border: 3px solid #ff6a00;
+        box-shadow: 0 0 30px rgba(255,106,0,0.5);
+    }
+
+    .monster-form {
+        background: rgba(0,0,0,0.8);
+        border: 3px solid #ff6a00;
+        border-radius: 20px;
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-family: 'Nosifer', serif;
+        font-size: 1.2rem;
+        color: #ffd700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group select {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        background: rgba(0,0,0,0.6);
+        border: 2px solid #ff6a00;
+        border-radius: 10px;
+        color: #fff;
+        font-family: 'Creepster', serif;
+        cursor: pointer;
+    }
+
+    .form-group select:focus {
+        outline: none;
+        border-color: #ffd700;
+        box-shadow: 0 0 15px rgba(255,215,0,0.5);
+    }
+
+    .form-group select.wrong {
+        border-color: #ff4500;
+        background: rgba(139,0,0,0.3);
+    }
+
+    .error-message {
+        background: rgba(139,0,0,0.4);
+        border: 2px solid #ff4500;
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        color: #ff6b6b;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .error-message ul {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .error-message li {
+        margin: 0.3rem 0;
+        font-size: 1rem;
+    }
+
+    .submit-btn {
+        display: block;
+        width: 100%;
+        padding: 1.2rem;
+        background: linear-gradient(135deg, #8b0000, #ff4500);
+        border: 2px solid #ffd700;
+        border-radius: 20px;
+        color: #fff;
+        font-family: 'Nosifer', serif;
+        font-size: 1.3rem;
+        cursor: pointer;
+        margin-top: 2rem;
+    }
+
+    .submit-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(255,215,0,0.8);
+    }
+
+    .success-box {
+        max-width: 600px;
+        margin: 3rem auto;
+        background: rgba(42,122,42,0.4);
+        border: 3px solid #2a7a2a;
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+    }
+    .success-box h2 { font-family: 'Nosifer', serif; color: #ffd700; font-size: 2rem; margin-bottom: 1rem; }
+    .success-box p { font-size: 1.3rem; color: #fff; margin: 0.5rem 0; }
+
+    .monster-description {
+        background: rgba(0,0,0,0.6);
+        border: 2px solid #2a7a2a;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        text-align: left;
+    }
+
+    .monster-description p {
+        margin: 0.5rem 0;
+        font-size: 1.1rem;
+        color: #90EE90;
+    }
+
+    .back-btn {
+        display: block;
+        width: fit-content;
+        margin: 3rem auto;
+        padding: 1rem 2.5rem;
+        background: rgba(139,0,0,0.9);
+        border: 2px solid #ff6a00;
+        border-radius: 25px;
+        color: #fff;
+        font-family: 'Nosifer', serif;
+        font-size: 1.1rem;
+        text-decoration: none;
+        text-align: center;
+    }
+    .back-btn:hover { background: #ff4500; transform: scale(1.05); }
+</style>
+
+<div class="task-container">
+    <h1 class="task-title">🍳 The Witch's Kitchen</h1>
+    <p class="task-instruction">Look at the picture and describe the monster correctly! Only one combination is right.</p>
+
+    {% if solved %}
+        <div class="success-box">
+            <h2>✅ Excellent Job!</h2>
+            <p>You described the monster exactly right!</p>
+
+            {% if correct_monster %}
+            <div class="monster-description">
+                <p><b>Name:</b> {{ correct_monster.name }}</p>
+                <p><b>Mood:</b> {{ correct_monster.mood }}</p>
+                <p><b>Hair:</b> {{ correct_monster.hair }}</p>
+                <p><b>Eyes:</b> {{ correct_monster.eyes }}</p>
+                <p><b>Body:</b> {{ correct_monster.body }}</p>
+                <p><b>Has got:</b> {{ correct_monster.has_got }}</p>
+            </div>
+            {% endif %}
+
+            <p style="font-size:1.5rem; margin:1rem 0; color:#ffd27f;">You found: <b> Pumpkin Dust</b></p>
+        </div>
+    {% else %}
+        <!-- КАРТИНКА МОНСТРА -->
+        <div class="monster-image-container">
+            <img src="{{ url_for('static', filename='images/kitchen-bg.jpg') }}"
+                 alt="The Monster"
+                 class="monster-image">
+        </div>
+
+        {% if wrong_fields %}
+        <div class="error-message">
+            ❌ Some fields are wrong! Fix these:
+            <ul>
+                {% for field in wrong_fields %}
+                <li>• {{ field|title }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="POST" class="monster-form">
+            {% for field, options in descriptions.items() %}
+            <div class="form-group">
+                <label for="{{ field }}">{{ field|title }}:</label>
+                <select name="{{ field }}" id="{{ field }}"
+                        class="{% if field in wrong_fields %}wrong{% endif %}" required>
+                    <option value="">-- Choose --</option>
+                    {% for option in options %}
+                    <option value="{{ option }}"
+                            {% if user_answers.get(field) == option %}selected{% endif %}>
+                        {{ option }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="submit-btn">Submit Description 🎃</button>
+        </form>
+    {% endif %}
+
+    <a href="{{ url_for('door_room') }}" class="back-btn">← Back to Door Room</a>
+</div>
+{% endblock %}

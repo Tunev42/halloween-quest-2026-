@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>🎃 Halloween Night 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Декор -->
+<div class="moon"></div>
+<div class="fog"></div>
+<div class="web tl"></div>
+<div class="web tr"></div>
+
+<!-- Canvas -->
+<canvas id="fx-canvas"></canvas>
+<canvas id="bat-canvas"></canvas>
+
+<!-- Контент -->
+<h1>🎃 Halloween Night 🎃</h1>
+<p class="subtitle">~ Ночь, когда оживают легенды ~</p>
+
+<div class="countdown" id="countdown">
+    До Хеллоуина:
+    <span id="d">...</span>д
+    <span id="h">...</span>ч
+    <span id="m">...</span>м
+    <span id="s">...</span>с
+</div>
+
+<div class="story-box" id="storyBox">
+    <p id="storyText">Нажми, чтобы узнать страшную историю...</p>
+    <button onclick="loadStory()">🔮 Открыть тайну</button>
+</div>
+
+<div class="game-panel">
+    <button class="game-btn" onclick="startGame()">👻 Начать охоту</button>
+    <span class="score">Счёт: <b id="score">0</b></span>
+</div>
+
+<div class="cards">
+    <div class="card" onclick="trick(this, '👻')">
+        <span class="emoji">👻</span>
+        <h3>Призрак</h3>
+        <p>Бродит по коридорам старого замка...</p>
+    </div>
+    <div class="card" onclick="trick(this, '🧛')">
+        <span class="emoji">🧛</span>
+        <h3>Вампир</h3>
+        <p>Ждёт своей жертвы в тени...</p>
+    </div>
+    <div class="card" onclick="trick(this, '🕷️')">
+        <span class="emoji">🕷️</span>
+        <h3>Паук</h3>
+        <p>Плетёт паутину судьбы...</p>
+    </div>
+    <div class="card" onclick="trick(this, '🧙‍♀️')">
+        <span class="emoji">🧙‍♀️</span>
+        <h3>Ведьма</h3>
+        <p>Варит зелье в полнолуние...</p>
+    </div>
+    <div class="card" onclick="trick(this, '🧟')">
+        <span class="emoji">🧟</span>
+        <h3>Зомби</h3>
+        <p>Восстал из могилы...</p>
+    </div>
+    <div class="card" onclick="trick(this, '🎃')">
+        <span class="emoji">🎃</span>
+        <h3>Джек</h3>
+        <p>Светит во тьме пути...</p>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 · Happy Halloween 🕸️</p>
+    <p>Посещений: <b>{{ visits }}</b> · Кликай по экрану — будет кровь 🩸</p>
+    <button class="wish-btn" onclick="loadWish()">✨ Получить пожелание</button>
+    <p id="wishText" class="wish-text"></p>
+</footer>
+
+<!-- Кнопка звука -->
+<button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔇</button>
+
+<!-- Курсор -->
+<div class="cursor" id="cursor">🎃</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

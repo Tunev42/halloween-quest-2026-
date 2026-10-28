@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .room {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 2rem;
+        min-height: 100vh;
+        background: linear-gradient(rgba(5,0,15,0.5), rgba(5,0,15,0.75)),
+            url('/static/images/basement-bg.jpg') center/cover no-repeat;
+    }
+    .top-bar, .bottom-bar, .moon, .fog, .web { display: none !important; }
+    .room > * { position: relative; z-index: 5; }
+
+    .task-container { max-width: 1000px; margin: 2rem auto; }
+    .task-title {
+        font-family: 'Nosifer', serif;
+        font-size: 2rem;
+        color: #ff6a00;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    .task-instruction {
+        text-align: center;
+        font-size: 1.3rem;
+        color: #ffd27f;
+        margin-bottom: 2rem;
+        font-family: Georgia, serif;
+        font-style: italic;
+    }
+
+    .task-group {
+        background: rgba(0,0,0,0.85);
+        border: 3px solid #ff6a00;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .task-number {
+        font-family: 'Nosifer', serif;
+        font-size: 1.3rem;
+        color: #ffd700;
+        margin-bottom: 1rem;
+    }
+
+    .words-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        margin: 1.5rem 0;
+    }
+
+    .word-btn {
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #4b0082, #8b0000);
+        border: 2px solid #ff6a00;
+        border-radius: 15px;
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Creepster', serif;
+        min-width: 120px;
+    }
+
+    .word-btn:hover {
+        transform: scale(1.08);
+        box-shadow: 0 0 20px #ff6a00;
+    }
+
+    .word-btn.selected {
+        background: linear-gradient(135deg, #2a7a2a, #4a9a4a);
+        border-color: #ffd700;
+        box-shadow: 0 0 20px rgba(255,215,0,0.6);
+    }
+
+    .word-btn.wrong {
+        background: rgba(139,0,0,0.8);
+        border-color: #ff4500;
+        animation: shake 0.5s;
+    }
+
+    .word-btn.correct {
+        background: linear-gradient(135deg, #2a7a2a, #4a9a4a);
+        border-color: #ffd700;
+        cursor: default;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    .hint-text {
+        text-align: center;
+        color: #ffd27f;
+        font-style: italic;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        opacity: 0.8;
+    }
+
+    .group-status {
+        text-align: center;
+        margin-top: 0.8rem;
+        font-size: 1rem;
+        min-height: 1.5rem;
+    }
+
+    .group-status.correct { color: #90EE90; }
+    .group-status.wrong { color: #ff6b6b; }
+
+    .submit-btn {
+        display: block;
+        width: 100%;
+        padding: 1.2rem;
+        background: linear-gradient(135deg, #8b0000, #ff4500);
+        border: 2px solid #ffd700;
+        border-radius: 20px;
+        color: #fff;
+        font-family: 'Nosifer', serif;
+        font-size: 1.3rem;
+        cursor: pointer;
+        margin-top: 2rem;
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(255,215,0,0.8);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .success-box {
+        max-width: 600px;
+        margin: 3rem auto;
+        background: rgba(42,122,42,0.4);
+        border: 3px solid #2a7a2a;
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+    }
+    .success-box h2 { font-family: 'Nosifer', serif; color: #ffd700; font-size: 2rem; margin-bottom: 1rem; }
+    .success-box p { font-size: 1.3rem; color: #fff; margin: 0.5rem 0; }
+
+    .back-btn {
+        display: block;
+        width: fit-content;
+        margin: 3rem auto;
+        padding: 1rem 2.5rem;
+        background: rgba(139,0,0,0.9);
+        border: 2px solid #ff6a00;
+        border-radius: 25px;
+        color: #fff;
+        font-family: 'Nosifer', serif;
+        font-size: 1.1rem;
+        text-decoration: none;
+        text-align: center;
+    }
+    .back-btn:hover { background: #ff4500; transform: scale(1.05); }
+</style>
+
+<div class="task-container">
+    <h1 class="task-title">🪜 The Dark Basement</h1>
+    <p class="task-instruction">Find the odd word out in each group!</p>
+
+    {% if solved %}
+        <div class="success-box">
+            <h2>Excellent job!</h2>
+            <p>You found all odd words!</p>
+            <p style="font-size:1.5rem; margin:1rem 0; color:#ffd27f;">You found: <b>🦇 Bat Wing</b></p>
+        </div>
+    {% else %}
+        <form method="POST" id="basementForm">
+            {% for task in tasks %}
+            <div class="task-group" data-task-index="{{ loop.index0 }}" data-correct="{{ task.answer }}">
+                <div class="task-number">Group {{ loop.index }}:</div>
+                <div class="words-row">
+                    {% for word in task.words %}
+                    <button type="button" class="word-btn" data-word="{{ word }}" onclick="selectWord(this)">
+                        {{ word }}
+                    </button>
+                    {% endfor %}
+                </div>
+                <div class="group-status" id="status{{ loop.index0 }}"></div>
+                <!-- Скрытое поле для отправки ответа -->
+                <input type="hidden" name="answer{{ loop.index0 }}" id="answer{{ loop.index0 }}" value="">
+            </div>
+            {% endfor %}
+
+            <button type="button" class="submit-btn" id="checkAllBtn" onclick="checkAllAnswers()">
+                Check All Answers 🎃
+            </button>
+
+            <!-- Кнопка отправки формы (скрыта, активируется после проверки) -->
+            <button type="submit" class="submit-btn" id="submitBtn" style="display:none;">
+                Submit & Get Bat Wing
+            </button>
+        </form>
+    {% endif %}
+
+    <a href="{{ url_for('door_room') }}" class="back-btn">← Back to Door Room</a>
+</div>
+
+<script>
+// Хранилище ответов
+const userAnswers = {};
+const totalGroups = {{ tasks|length }};
+
+function selectWord(button) {
+    const group = button.closest('.task-group');
+    const taskIndex = group.getAttribute('data-task-index');
+    const word = button.getAttribute('data-word');
+
+    // Снимаем выделение со всех кнопок в этой группе
+    group.querySelectorAll('.word-btn').forEach(btn => {
+        btn.classList.remove('selected', 'wrong');
+    });
+
+    // Выделяем выбранную
+    button.classList.add('selected');
+
+    // Сохраняем ответ
+    userAnswers[taskIndex] = word;
+    document.getElementById(`answer${taskIndex}`).value = word;
+
+    // Сбрасываем статус
+    const status = document.getElementById(`status${taskIndex}`);
+    status.textContent = '';
+    status.className = 'group-status';
+}
+
+function checkAllAnswers() {
+    // Проверяем, что все группы выбраны
+    for (let i = 0; i < totalGroups; i++) {
+        if (!userAnswers[i]) {
+            alert(`Please select a word in Group ${i + 1}!`);
+            return;
+        }
+    }
+
+    let allCorrect = true;
+
+    // Проверяем каждую группу
+    for (let i = 0; i < totalGroups; i++) {
+        const group = document.querySelector(`[data-task-index="${i}"]`);
+        const correctAnswer = group.getAttribute('data-correct');
+        const userAnswer = userAnswers[i];
+        const status = document.getElementById(`status${i}`);
+
+        if (userAnswer === correctAnswer) {
+            // Правильно!
+            status.textContent = '✅ Correct!';
+            status.className = 'group-status correct';
+
+            // Подсвечиваем правильную кнопку зелёным
+            group.querySelectorAll('.word-btn').forEach(btn => {
+                if (btn.getAttribute('data-word') === userAnswer) {
+                    btn.classList.remove('selected');
+                    btn.classList.add('correct');
+                }
+                btn.disabled = true; // блокируем кнопки
+            });
+        } else {
+            // Неправильно!
+            allCorrect = false;
+            status.textContent = '❌ Wrong! Try again.';
+            status.className = 'group-status wrong';
+
+            // Подсвечиваем неправильную кнопку красным
+            group.querySelectorAll('.word-btn').forEach(btn => {
+                if (btn.getAttribute('data-word') === userAnswer) {
+                    btn.classList.remove('selected');
+                    btn.classList.add('wrong');
+                }
+            });
+
+            // Через 1.5 секунды снимаем красную подсветку, чтобы можно было выбрать снова
+            setTimeout(() => {
+                const wrongBtn = group.querySelector(`[data-word="${userAnswer}"]`);
+                if (wrongBtn) {
+                    wrongBtn.classList.remove('wrong');
+                }
+                status.textContent = '';
+                status.className = 'group-status';
+            }, 1500);
+        }
+    }
+
+    // Если всё правильно — показываем кнопку отправки
+    if (allCorrect) {
+        document.getElementById('checkAllBtn').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'block';
+        document.getElementById('submitBtn').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+</script>
+{% endblock %}
